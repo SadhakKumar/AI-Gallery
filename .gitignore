@@ -1,0 +1,10 @@
+.venv
+gallery
+extended_gallery
+qdrant_storage
+
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.env.*.local

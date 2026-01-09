@@ -1,0 +1,5 @@
+dotenv
+sentence_transformers
+ollama
+qdrant_client
+fastapi
