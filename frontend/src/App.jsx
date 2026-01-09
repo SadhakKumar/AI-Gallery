@@ -25,7 +25,12 @@ function App() {
     try {
       setIsLoadingGallery(true);
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_SERVER_URL}/all-images`
+        `${import.meta.env.VITE_BACKEND_SERVER_URL}/all-images`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
       );
       console.log("response:", response.data);
       setGallery(response.data);
@@ -50,7 +55,12 @@ function App() {
       const response = await axios.get(
         `${
           import.meta.env.VITE_BACKEND_SERVER_URL
-        }/similar-images?caption=${searchQuery}&top_k=${searchLimit}`
+        }/similar-images?caption=${searchQuery}&top_k=${searchLimit}`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
       );
       console.log(response.data);
       setSearchedImages(response.data);
@@ -88,6 +98,7 @@ function App() {
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            "ngrok-skip-browser-warning": "true",
           },
         }
       );
