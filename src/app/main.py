@@ -1,14 +1,18 @@
-from fastapi import FastAPI
+import shutil
+from fastapi import FastAPI, Request, File, UploadFile, BackgroundTasks
 from fastapi.responses import FileResponse
-from fastapi import Request
 import os
 from pathlib import Path
 from src.services.gallery_service import add_images_to_gallery, get_similar_images
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
+from pathlib import Path
+from typing import List
 
-load_dotenv()
+dotenv_path = Path('src/.env')
+
+load_dotenv(dotenv_path=dotenv_path)
 BASE_URL = os.getenv("BACKEND_URL")
 app = FastAPI()
 
@@ -22,6 +26,10 @@ app.add_middleware(
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 GALLERY_PATH = BASE_DIR / "gallery"
+EXTENDED_GALLERY_PATH = BASE_DIR / "extended_gallery"
+
+# Processing status tracking
+processing_status = {"status": "idle", "message": "", "error": None}
 
 app.mount("/gallery", StaticFiles(directory=GALLERY_PATH), name="gallery")
 
@@ -71,14 +79,41 @@ def get_similar_images_endpoint(caption: str, top_k: int = 3):
     except Exception as e:
         return {"error": str(e)}
     
-@app.get("/add-images")
-def add_images():
-    """Add images from extended_gallery to gallery."""
+def process_images_background():
+    """Background task to process images."""
+    global processing_status
     try:
+        processing_status = {"status": "processing", "message": "Processing images...", "error": None}
         add_images_to_gallery()
-        return {"message": "Images added successfully"}
+        processing_status = {"status": "completed", "message": "Images processed successfully", "error": None}
     except Exception as e:
-        return {"error": str(e)}
+        processing_status = {"status": "error", "message": "", "error": str(e)}
+
+@app.post("/add-images")
+def add_images(files: List[UploadFile] = File(...), background_tasks: BackgroundTasks = None):
+    """Add images from extended_gallery to gallery."""
+    
+    try:
+        for file in files:
+            file_path = EXTENDED_GALLERY_PATH / file.filename
+            with open(file_path, "wb") as f:
+                shutil.copyfileobj(file.file, f)
+            file.file.close()
+        
+        background_tasks.add_task(process_images_background)
+        
+        return {
+            "message": "Images uploaded successfully. Processing started in background.",
+            "status": "processing"
+        }
+    except Exception as e:
+        return {"error": str(e)}, 400
+
+@app.get("/process-status")
+def get_process_status():
+    """Get the current processing status."""
+    return processing_status
+
 
 if __name__ == "__main__":
     import uvicorn

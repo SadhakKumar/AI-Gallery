@@ -93,7 +93,7 @@ function App() {
 
     try {
       await axios.post(
-        `${import.meta.env.VITE_BACKEND_SERVER_URL}/gallery/upload`,
+        `${import.meta.env.VITE_BACKEND_SERVER_URL}/add-images`,
         formData,
         {
           headers: {

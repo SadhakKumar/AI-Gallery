@@ -3,3 +3,5 @@ sentence_transformers
 ollama
 qdrant_client
 fastapi
+uvicorn
+python-multipart
