@@ -172,11 +172,3 @@ npm run dev
 - Batch processing improvements
 
 ---
-
-## License
-
-[Add your license information here]
-
-## Contributing
-
-[Add contribution guidelines here]
